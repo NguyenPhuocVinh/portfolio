@@ -80,9 +80,9 @@ const AboutSection: React.FC = () => {
             >
                 Passionate and research-oriented <strong className="text-gray-900">Fullstack Engineer</strong> dedicated to building
                 high-quality, <strong className="text-gray-900">scalable software solutions</strong>. Possesses a versatile skillset capable of bridging
-                <strong className="text-gray-900">Backend logic</strong> and <strong className="text-gray-900">Frontend architecture</strong> to solve complex
+                <strong className="text-gray-900"> Backend logic</strong> and <strong className="text-gray-900">Frontend architecture</strong> to solve complex
                 engineering challenges. Committed to <strong className="text-gray-900">continuous professional growth</strong> by actively exploring
-                <strong className="text-gray-900">emerging technologies</strong>, analyzing open-source repositories, and applying best practices to deliver
+                <strong className="text-gray-900"> emerging technologies</strong>, analyzing open-source repositories, and applying best practices to deliver
                 efficient, maintainable code.
             </motion.p>
 

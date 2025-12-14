@@ -27,64 +27,60 @@ function App() {
   };
 
   const handleScrollToSection = (section: SectionName) => {
-    setActiveSection(section);
-
     const target = sectionMap[section]?.current;
     if (!target) return;
 
-    history.pushState(null, "", `/#${section}`);
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    setActiveSection(section);
+    window.location.hash = section;
+
+    target.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   useEffect(() => {
-    const hash = window.location.hash.replace("#", "");
-    if (!hash) return;
+    const hash = window.location.hash.replace("#", "") as SectionName;
+    if (!hash || !sectionMap[hash]) return;
 
-    if (!["about", "experience", "projects", "contact"].includes(hash)) return;
-    const section = hash as SectionName;
+    setActiveSection(hash);
 
-    const target = sectionMap[section]?.current;
-    if (!target) return;
-
-    setTimeout(() => {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
+    requestAnimationFrame(() => {
+      sectionMap[hash]?.current?.scrollIntoView({
+        behavior: "auto",
+        block: "start",
+      });
+    });
   }, []);
 
   useEffect(() => {
-    const sections = [
-      aboutRef,
-      experienceRef,
-      projectsRef,
-      contactRef,
-    ];
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const section = entry.target.getAttribute("data-section");
-            if (section) {
-              setActiveSection(section as SectionName);
-              history.replaceState(null, "", `/#${section}`);
-            }
+          if (!entry.isIntersecting) return;
+
+          const section = entry.target.getAttribute("data-section") as SectionName;
+          if (!section) return;
+
+          setActiveSection(section);
+
+          if (window.location.hash !== `#${section}`) {
+            window.location.hash = section;
           }
         });
       },
       {
-        root: null,
         rootMargin: "-40% 0px -40% 0px",
         threshold: 0,
       }
     );
 
-    sections.forEach((ref) => {
+    Object.values(sectionMap).forEach((ref) => {
       if (ref.current) observer.observe(ref.current);
     });
 
     return () => observer.disconnect();
   }, []);
-
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-white">
