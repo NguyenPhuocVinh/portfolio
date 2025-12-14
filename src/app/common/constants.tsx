@@ -29,7 +29,7 @@ export const EXPERIENCES: Experience[] = [
     {
         company: 'StartUp Korea',
         role: 'Backend Developer',
-        period: 'Apr 2023 - Oct 2025',
+        period: 'Apr 2025 - Oct 2025',
         type: 'Full-time',
         logo: './images/startup.jpg',
         description: [
