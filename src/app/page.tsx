@@ -1,65 +1,149 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useRef, useEffect } from "react";
+import StickySidebar from "./components/sticky";
+import AboutSection from "./components/sections/about";
+import ExperienceSection from "./components/sections/experience";
+import ProjectsSection from "./components/sections/project";
+import ContactSection from "./components/sections/contact";
+import { Navigation } from "./components/navigation";
+import { motion } from "framer-motion";
+import { SectionName } from "./common/constants";
+import MobileNavigation from "./components/mobile-navigation";
+
+function App() {
+  const aboutRef = useRef<HTMLDivElement>(null!);
+  const experienceRef = useRef<HTMLDivElement>(null!);
+  const projectsRef = useRef<HTMLDivElement>(null!);
+  const contactRef = useRef<HTMLDivElement>(null!);
+
+  const [activeSection, setActiveSection] = React.useState<SectionName>("about");
+
+  const sectionMap: Record<SectionName, React.RefObject<HTMLDivElement>> = {
+    about: aboutRef,
+    experience: experienceRef,
+    projects: projectsRef,
+    contact: contactRef,
+  };
+
+  const handleScrollToSection = (section: SectionName) => {
+    setActiveSection(section);
+
+    const target = sectionMap[section]?.current;
+    if (!target) return;
+
+    history.pushState(null, "", `/#${section}`);
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return;
+
+    if (!["about", "experience", "projects", "contact"].includes(hash)) return;
+    const section = hash as SectionName;
+
+    const target = sectionMap[section]?.current;
+    if (!target) return;
+
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    const sections = [
+      aboutRef,
+      experienceRef,
+      projectsRef,
+      contactRef,
+    ];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const section = entry.target.getAttribute("data-section");
+            if (section) {
+              setActiveSection(section as SectionName);
+              history.replaceState(null, "", `/#${section}`);
+            }
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: "-40% 0px -40% 0px",
+        threshold: 0,
+      }
+    );
+
+    sections.forEach((ref) => {
+      if (ref.current) observer.observe(ref.current);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="relative min-h-screen overflow-x-hidden bg-white">
+      {/* ================= MOBILE SIDEBAR ================= */}
+      <div className="block lg:hidden px-6 pt-20">
+        <StickySidebar />
+      </div>
+
+      {/* ================= DESKTOP LEFT SIDEBAR ================= */}
+      <aside className="hidden lg:block fixed inset-y-0 left-0 w-1/3 z-30 bg-white">
+        <StickySidebar />
+      </aside>
+
+      {/* ================= DESKTOP RIGHT NAV ================= */}
+      <aside className="hidden lg:block fixed right-10 top-1/2 -translate-y-1/2 z-40">
+        <Navigation
+          setSelectedSection={handleScrollToSection}
+          selectedSection={activeSection}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+      </aside>
+
+      {/* ================= MOBILE RIGHT NAV ================= */}
+      <MobileNavigation
+        setSelectedSection={handleScrollToSection}
+        selectedSection={activeSection}
+      />
+
+      {/* ================= MAIN CONTENT ================= */}
+      <motion.main
+        className="
+    px-4
+    sm:px-6
+    md:px-10
+    lg:ml-[33.33%]
+    lg:mr-40
+  "
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div ref={aboutRef} data-section="about">
+          <AboutSection />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div ref={experienceRef} data-section="experience">
+          <ExperienceSection />
         </div>
-      </main>
+
+        <div ref={projectsRef} data-section="projects">
+          <ProjectsSection />
+        </div>
+
+        <div ref={contactRef} data-section="contact">
+          <ContactSection />
+        </div>
+      </motion.main>
+
     </div>
   );
 }
+
+export default App;
